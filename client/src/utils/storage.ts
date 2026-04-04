@@ -1,9 +1,9 @@
 import type { UserWithToken } from '../types';
 
-const AUTH_KEY = 'auth';
+const AUTH_KEY = 'task-board-user';
 
 export const getStoredAuth = (): UserWithToken | null => {
-  const raw = localStorage.getItem(AUTH_KEY);
+  const raw = sessionStorage.getItem(AUTH_KEY);
   if (!raw) return null;
   try {
     return JSON.parse(raw);
@@ -13,9 +13,9 @@ export const getStoredAuth = (): UserWithToken | null => {
 };
 
 export const setStoredAuth = (auth: UserWithToken): void => {
-  localStorage.setItem(AUTH_KEY, JSON.stringify(auth));
+  sessionStorage.setItem(AUTH_KEY, JSON.stringify(auth));
 };
 
 export const removeStoredAuth = (): void => {
-  localStorage.removeItem(AUTH_KEY);
+  sessionStorage.removeItem(AUTH_KEY);
 };
