@@ -4,6 +4,20 @@
 
 Aplicación de tablero de tareas colaborativo en tiempo real. El sistema permite crear boards con tareas que pueden estar en estado **TODO**, **IN_PROGRESS** o **COMPLETED**.
 
+### Configuración de variables de entorno
+
+Cada carpeta (`server/` y `client/`) tiene su propio archivo `.env.example`. Debes crear un `.env` en cada una con los valores reales:
+
+```bash
+# En server/
+cp server/.env.example server/.env
+# Editar server/.env con los valores de Supabase
+
+# En client/
+cp client/.env.example client/.env
+# Editar client/.env con los valores de Supabase
+```
+
 ### Cómo ejecutar
 
 ```bash

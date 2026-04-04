@@ -43,7 +43,7 @@ export const getBoardWithTasksController = async (
   next: NextFunction
 ) => {
   try {
-    const board = await getBoardWithTasksService(req.params.id);
+    const board = await getBoardWithTasksService(req.params.id as string);
     res.json(board);
   } catch (error) {
     next(error);
@@ -58,7 +58,7 @@ export const createTaskController = async (
   try {
     const user = getUserFromRequest(req);
     const { title } = req.body;
-    const task = await createTaskService(req.params.boardId, title, user.id);
+    const task = await createTaskService(req.params.boardId as string, title, user.id);
     res.status(201).json(task);
   } catch (error) {
     next(error);
@@ -71,7 +71,7 @@ export const deleteTaskController = async (
   next: NextFunction
 ) => {
   try {
-    await deleteTaskService(req.params.boardId, req.params.taskId);
+    await deleteTaskService(req.params.boardId as string, req.params.taskId as string);
     res.status(204).send();
   } catch (error) {
     next(error);
@@ -86,8 +86,8 @@ export const updateTaskStatusController = async (
   try {
     const { status } = req.body;
     const task = await updateTaskStatusService(
-      req.params.boardId,
-      req.params.taskId,
+      req.params.boardId as string,
+      req.params.taskId as string,
       status
     );
     res.json(task);
