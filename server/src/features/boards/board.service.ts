@@ -1,27 +1,6 @@
 import Boom from '@hapi/boom';
 import { db } from '../../config/database';
-import { supabase } from '../../config/supabase';
 import { BoardWithCreator, BoardWithTasks, TaskWithCreator } from './board.types';
-
-// ─── Broadcast helpers ───────────────────────────────────────
-
-const broadcastTaskCreated = async (boardId: string, task: TaskWithCreator) => {
-  const channel = supabase.channel(`board:${boardId}`);
-  await channel.httpSend('task-created', task);
-  supabase.removeChannel(channel);
-};
-
-const broadcastTaskDeleted = async (boardId: string, taskId: string) => {
-  const channel = supabase.channel(`board:${boardId}`);
-  await channel.httpSend('task-deleted', { taskId });
-  supabase.removeChannel(channel);
-};
-
-const broadcastTaskUpdated = async (boardId: string, task: TaskWithCreator) => {
-  const channel = supabase.channel(`board:${boardId}`);
-  await channel.httpSend('task-updated', task);
-  supabase.removeChannel(channel);
-};
 
 // ─── Board services ──────────────────────────────────────────
 
@@ -103,7 +82,6 @@ export const createTaskService = async (
   );
 
   const task = result.rows[0];
-  broadcastTaskCreated(boardId, task);
   return task;
 };
 
@@ -120,7 +98,6 @@ export const deleteTaskService = async (
     throw Boom.notFound('Task not found');
   }
 
-  broadcastTaskDeleted(boardId, taskId);
 };
 
 export const updateTaskStatusService = async (
@@ -150,6 +127,5 @@ export const updateTaskStatusService = async (
   }
 
   const task = result.rows[0];
-  broadcastTaskUpdated(boardId, task);
   return task;
 };

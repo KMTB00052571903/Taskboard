@@ -4,7 +4,6 @@ import type { ComponentChildren } from 'preact';
 import type { Task, BoardWithTasks } from '../types';
 import { useAxios } from './AxiosProvider';
 import { useToast } from './ToastProvider';
-import useSupabase from '../hooks/useSupabase';
 
 interface BoardContextType {
   board: BoardWithTasks | null;
@@ -32,7 +31,6 @@ interface BoardProviderProps {
 export const BoardProvider = ({ boardId, children }: BoardProviderProps) => {
   const axios = useAxios();
   const { showToast } = useToast();
-  const supabase = useSupabase();
 
   const [board, setBoard] = useState<BoardWithTasks | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,47 +50,8 @@ export const BoardProvider = ({ boardId, children }: BoardProviderProps) => {
     }
   };
 
-  const subscribeToBoard = () => {
-    const channel = supabase.channel(`board:${boardId}`);
-    channel
-      .on('broadcast', { event: 'task-created' }, (payload) => {
-        const task = payload.payload as Task;
-        setBoard((prev) => {
-          if (!prev) return prev;
-          if (prev.tasks.some((t) => t.id === task.id)) return prev;
-          return { ...prev, tasks: [...prev.tasks, task] };
-        });
-      })
-      .on('broadcast', { event: 'task-deleted' }, (payload) => {
-        const { taskId } = payload.payload as { taskId: string };
-        setBoard((prev) => {
-          if (!prev) return prev;
-          return { ...prev, tasks: prev.tasks.filter((t) => t.id !== taskId) };
-        });
-      })
-      .on('broadcast', { event: 'task-updated' }, (payload) => {
-        const updated = payload.payload as Task;
-        setBoard((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            tasks: prev.tasks.map((t) => (t.id === updated.id ? updated : t)),
-          };
-        });
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
-
   useEffect(() => {
     fetchBoard();
-    const unsubscribe = subscribeToBoard();
-    return () => {
-      unsubscribe();
-    };
   }, [boardId]);
 
   const createTask = async (title: string): Promise<boolean> => {
