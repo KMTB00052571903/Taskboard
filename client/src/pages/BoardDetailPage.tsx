@@ -1,4 +1,5 @@
 import { useState } from 'preact/hooks';
+import { useNavigate } from 'react-router-dom';
 import { useBoard } from '../providers/BoardProvider';
 import type { Task } from '../types';
 
@@ -10,7 +11,8 @@ const STATUS_CONFIG = {
 
 const COLUMNS: Array<Task['status']> = ['TODO', 'IN_PROGRESS', 'COMPLETED'];
 
-export const BoardDetailPage = ({ onBack }: { onBack: () => void }) => {
+export const BoardDetailPage = () => {
+  const navigate = useNavigate();
   const { board, loading, creating, createTask, deleteTask, updateTaskStatus } =
     useBoard();
 
@@ -46,7 +48,7 @@ export const BoardDetailPage = ({ onBack }: { onBack: () => void }) => {
         <div class="text-center">
           <p class="text-[var(--color-text-muted)] text-lg">Board no encontrado</p>
           <button
-            onClick={onBack}
+            onClick={() => navigate('/')}
             class="mt-4 px-4 py-2 rounded-lg bg-[var(--color-accent)] text-white text-sm cursor-pointer"
           >
             Volver
@@ -60,7 +62,7 @@ export const BoardDetailPage = ({ onBack }: { onBack: () => void }) => {
     <div class="min-h-screen p-4 max-w-6xl mx-auto">
       <div class="flex items-center gap-4 mb-6">
         <button
-          onClick={onBack}
+          onClick={() => navigate('/')}
           class="px-3 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] text-sm cursor-pointer transition-colors"
         >
           ← Volver

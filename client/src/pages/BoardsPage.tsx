@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'preact/hooks';
+import { useNavigate } from 'react-router-dom';
 import { useAxios } from '../providers/AxiosProvider';
 import { useUser } from '../providers/UserProvider';
 import { useToast } from '../providers/ToastProvider';
 import type { Board } from '../types';
 
-export const BoardsPage = ({
-  onSelectBoard,
-}: {
-  onSelectBoard: (id: string) => void;
-}) => {
+export const BoardsPage = () => {
+  const navigate = useNavigate();
   const axios = useAxios();
   const { user, logout } = useUser();
   const { showToast } = useToast();
@@ -105,7 +103,7 @@ export const BoardsPage = ({
           {boards.map((board) => (
             <button
               key={board.id}
-              onClick={() => onSelectBoard(board.id)}
+              onClick={() => navigate(`/boards/${board.id}`)}
               class="w-full text-left p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
             >
               <h3 class="font-semibold">{board.name}</h3>

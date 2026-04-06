@@ -1,6 +1,7 @@
 import { createContext } from 'preact';
 import { useContext, useEffect, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
+import { useParams } from 'react-router-dom';
 import type { Task, BoardWithTasks } from '../types';
 import { useAxios } from './AxiosProvider';
 import { useToast } from './ToastProvider';
@@ -24,11 +25,11 @@ const BoardContext = createContext<BoardContextType>({
 });
 
 interface BoardProviderProps {
-  boardId: string;
   children: ComponentChildren;
 }
 
-export const BoardProvider = ({ boardId, children }: BoardProviderProps) => {
+export const BoardProvider = ({ children }: BoardProviderProps) => {
+  const { boardId } = useParams<{ boardId: string }>();
   const axios = useAxios();
   const { showToast } = useToast();
 
