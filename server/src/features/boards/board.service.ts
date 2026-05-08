@@ -1,5 +1,6 @@
 import Boom from '@hapi/boom';
 import { db } from '../../config/database';
+import { supabase } from '../../config/supabase';
 import { BoardWithCreator, BoardWithTasks, TaskWithCreator } from './board.types';
 
 // ─── Board services ──────────────────────────────────────────
@@ -82,6 +83,15 @@ export const createTaskService = async (
   );
 
   const task = result.rows[0];
+
+  try {
+    const channel = supabase.channel(`board:${boardId}`);
+    channel.httpSend('task-created', task);
+    supabase.removeChannel(channel);
+  } catch (err) {
+    // silencioso intencional: un fallo de Supabase no debe romper la respuesta HTTP
+  }
+
   return task;
 };
 
@@ -98,6 +108,13 @@ export const deleteTaskService = async (
     throw Boom.notFound('Task not found');
   }
 
+  try {
+    const channel = supabase.channel(`board:${boardId}`);
+    channel.httpSend('task-deleted', { taskId });
+    supabase.removeChannel(channel);
+  } catch (err) {
+    // silencioso intencional: un fallo de Supabase no debe romper la respuesta HTTP
+  }
 };
 
 export const updateTaskStatusService = async (
@@ -127,5 +144,14 @@ export const updateTaskStatusService = async (
   }
 
   const task = result.rows[0];
+
+  try {
+    const channel = supabase.channel(`board:${boardId}`);
+    channel.httpSend('task-updated', task);
+    supabase.removeChannel(channel);
+  } catch (err) {
+    // silencioso intencional: un fallo de Supabase no debe romper la respuesta HTTP
+  }
+
   return task;
 };

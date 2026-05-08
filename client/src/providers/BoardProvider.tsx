@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import type { Task, BoardWithTasks } from '../types';
 import { useAxios } from './AxiosProvider';
 import { useToast } from './ToastProvider';
+import useSupabase from '../hooks/useSupabase';
 
 interface BoardContextType {
   board: BoardWithTasks | null;
@@ -32,6 +33,7 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
   const { boardId } = useParams<{ boardId: string }>();
   const axios = useAxios();
   const { showToast } = useToast();
+  const supabase = useSupabase();
 
   const [board, setBoard] = useState<BoardWithTasks | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,40 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
 
   useEffect(() => {
     fetchBoard();
+  }, [boardId]);
+
+  useEffect(() => {
+    if (!boardId) return;
+
+    const channel = supabase
+      .channel(`board:${boardId}`)
+      .on('broadcast', { event: 'task-created' }, ({ payload }) => {
+        setBoard((prev) => {
+          if (!prev) return prev;
+          if (prev.tasks.some((t) => t.id === payload.id)) return prev;
+          return { ...prev, tasks: [...prev.tasks, payload] };
+        });
+      })
+      .on('broadcast', { event: 'task-deleted' }, ({ payload }) => {
+        setBoard((prev) => {
+          if (!prev) return prev;
+          return { ...prev, tasks: prev.tasks.filter((t) => t.id !== payload.taskId) };
+        });
+      })
+      .on('broadcast', { event: 'task-updated' }, ({ payload }) => {
+        setBoard((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            tasks: prev.tasks.map((t) => (t.id === payload.id ? payload : t)),
+          };
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [boardId]);
 
   const createTask = async (title: string): Promise<boolean> => {
